@@ -8,19 +8,19 @@
 # production builds
 /dist
 
-# misc
-.DS_Store
-*.pem
-
 # logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# local env files (DO NOT COMMIT SECRETS)
+# environment files (DO NOT COMMIT SECRETS)
 .env*
 !.env.example
+
+# supabase local
+.supabase/
 
 # vercel
 .vercel
@@ -29,6 +29,19 @@ pnpm-debug.log*
 .vscode/
 .idea/
 
+# misc
+.DS_Store
+*.pem
+coverage/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prevent parent accidental commits
+../.env*
+../node_modules
+
+# cloud credentials
+*.key
+*.secret
