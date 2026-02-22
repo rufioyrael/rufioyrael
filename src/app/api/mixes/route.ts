@@ -9,6 +9,15 @@ function sanitizeSlug(input: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+export async function GET() {
+  if (process.env.VERCEL_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
+}
+
+
 export async function POST(req: Request) {
 
   if (process.env.NODE_ENV === "production") {
