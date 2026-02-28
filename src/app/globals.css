@@ -1,19 +1,74 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root {
-  color-scheme: dark;
+  --bg: #0b0b0d;           /* matte near-black */
+  --panel: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.10);
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.62);
+  --accent: #e10600;       /* ember red */
+  --accentSoft: rgba(225,6,0,0.25);
 }
 
 html, body {
-  height: 100%;
+  background: var(--bg);
+  color: var(--text);
 }
 
-body {
+/* cinematic ember glow background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
   background:
-    radial-gradient(1200px 800px at 20% 10%, rgba(255, 59, 47, 0.10), transparent 60%),
-    radial-gradient(900px 700px at 80% 20%, rgba(255, 255, 255, 0.04), transparent 55%),
-    linear-gradient(180deg, #060607 0%, #050507 60%, #030304 100%);
-  color: white;
+    radial-gradient(600px 300px at 20% 15%, rgba(225,6,0,0.16), transparent 65%),
+    radial-gradient(700px 380px at 80% 20%, rgba(225,6,0,0.10), transparent 70%),
+    radial-gradient(900px 520px at 50% 85%, rgba(255,255,255,0.05), transparent 65%);
+  filter: blur(18px);
+  opacity: 0.9;
+}
+
+/* optional subtle grain */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* reusable styles */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+}
+
+.btn-primary {
+  background: white;
+  color: black;
+  border-radius: 0.9rem;
+  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 12px 40px rgba(225,6,0,0.20);
+}
+
+.btn-ghost {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.85);
+  border-radius: 0.9rem;
+  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 1px rgba(225,6,0,0.20);
+  transform: translateY(-1px);
 }

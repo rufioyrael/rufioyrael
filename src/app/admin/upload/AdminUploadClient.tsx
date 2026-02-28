@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 function slugify(input: string) {
   return input
@@ -11,7 +12,6 @@ function slugify(input: string) {
 }
 
 export default function AdminUploadClient() {
-  const [adminSecret, setAdminSecret] = useState("");
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [tags, setTags] = useState("");
@@ -20,11 +20,27 @@ export default function AdminUploadClient() {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
+  const router = useRouter();
   const autoSlug = useMemo(() => slugify(title), [title]);
 
+ 
+  async function onLogout() {
+    setStatus(null);
+    setBusy(true);
+
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (!res.ok) throw new Error(await res.text());
+
+      window.location.href = "/login";
+    } catch (e: any) {
+      setStatus(e?.message ?? "Logout failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function onSubmit() {
-    if (!adminSecret) return setStatus("Missing admin secret.");
     if (!title) return setStatus("Missing title.");
     const finalSlug = slugify(slug || autoSlug);
     if (!finalSlug) return setStatus("Missing slug.");
@@ -39,7 +55,6 @@ export default function AdminUploadClient() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          adminSecret,
           slug: finalSlug,
           filename: file.name,
           contentType: file.type || "audio/mpeg",
@@ -76,7 +91,6 @@ export default function AdminUploadClient() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          adminSecret,
           slug: finalSlug,
           title,
           audio_url: publicUrl,
@@ -99,26 +113,25 @@ export default function AdminUploadClient() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold">Admin Upload</h1>
-        <p className="mt-1 text-white/60">
-          Uploads audio to R2 and publishes a mix record.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold">Admin Upload</h1>
+          <p className="mt-1 text-white/60">
+            Uploads audio to R2 and publishes a mix record.
+          </p>
+        </div>
+
+          <button
+            type="button"
+            onClick={onLogout}
+            disabled={busy}
+            className="btn-ghost px-3 py-2 text-sm disabled:opacity-60"
+            >
+            Logout
+          </button>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-6">
-        <label className="block">
-          <div className="mb-1 text-xs uppercase tracking-widest text-white/60">
-            Admin Secret
-          </div>
-          <input
-            value={adminSecret}
-            onChange={(e) => setAdminSecret(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-white/25"
-            placeholder="ADMIN_UPLOAD_SECRET"
-            type="password"
-          />
-        </label>
+      <div className="panel space-y-4 p-6">
 
         <label className="block">
           <div className="mb-1 text-xs uppercase tracking-widest text-white/60">
@@ -202,7 +215,7 @@ export default function AdminUploadClient() {
         <button
           onClick={onSubmit}
           disabled={busy}
-          className="w-full rounded-xl bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+          className="btn-primary w-full px-4 py-2 text-sm font-medium disabled:opacity-60"
         >
           {busy ? "Working…" : "Upload & Publish"}
         </button>
