@@ -2,68 +2,133 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="space-y-10">
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-8">
-        <div className="max-w-2xl space-y-4">
-          <div className="text-xs uppercase tracking-[0.35em] text-white/60">Melodic Techno • DnB • Underground</div>
-          <h1 className="text-4xl font-semibold tracking-tight">Rufio Yrael</h1>
-          <p className="text-white/70">
-            Fan-first hub for mixes, drops, and show dates. Hit play, follow, and stay locked in.
+    <main className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
+      {/* HERO */}
+      <section className="grid gap-10 lg:grid-cols-12 lg:items-start">
+        <div className="lg:col-span-7">
+          <h1 className="mt-6 text-4xl font-semibold leading-[1.02] tracking-tight sm:text-6xl">
+            Process &amp; Steel.
+            <span className="block text-white/70">
+              Underground sound, carefully built.
+            </span>
+          </h1>
+
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70">
+            DJ mixes, tracklists, and live recordings — presented with restraint.
+            Minimal interface. Maximum intention.
           </p>
 
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Link
-              href="/listen"
-              className="rounded-full bg-white px-5 py-2 text-sm font-medium text-black hover:bg-white/90"
-            >
-              Listen
-            </Link>
-            <a
-              href="https://soundcloud.com"
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/85 hover:border-white/30"
-            >
-              Follow on SoundCloud
-            </a>
-            <a
-              href="https://spotify.com"
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/85 hover:border-white/30"
-            >
-              Follow on Spotify
-            </a>
+          <div className="mt-10 flex flex-wrap items-center gap-3 text-xs text-white/50">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition duration-200 hover:border-[var(--accent)] hover:bg-white/[0.07] hover:text-white/80">
+              melodic techno
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition duration-200 hover:border-[var(--accent)] hover:bg-white/[0.07] hover:text-white/80">
+              drum &amp; bass
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition duration-200 hover:border-[var(--accent)] hover:bg-white/[0.07] hover:text-white/80">
+              dark / minimal
+            </span>
           </div>
+        </div>
 
-          <div className="flex flex-wrap gap-3 pt-2 text-sm">
-            <a className="text-white/70 hover:text-white" href="https://instagram.com" target="_blank" rel="noreferrer">
-              Instagram
-            </a>
-            <span className="text-white/30">•</span>
-            <a className="text-white/70 hover:text-white" href="https://youtube.com" target="_blank" rel="noreferrer">
-              YouTube
-            </a>
+        {/* RIGHT PANEL */}
+        <div className="lg:col-span-5">
+          <div className="panel p-6 sm:p-7">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-xs uppercase tracking-widest text-white/50">
+                  Latest
+                </div>
+                <div className="mt-2 text-lg font-semibold">
+                  New mixes &amp; recordings
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-white/65">
+                  Head to the Listen page for the full archive. Tracklists included.
+                </p>
+              </div>
+
+              <div className="hidden sm:block">
+                <div className="h-10 w-10 rounded-2xl border border-white/10 bg-white/5" />
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-3">
+              <Link
+                href="/listen"
+                className="group rounded-2xl border border-white/10 bg-black/30 p-4 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40 hover:shadow-[0_0_20px_rgba(225,6,0,0.18)]"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-medium">Browse the archive</div>
+                    <div className="mt-1 text-xs text-white/55">
+                      Published mixes, tags, and notes
+                    </div>
+                  </div>
+                  <div className="text-sm text-white/60 transition group-hover:translate-x-0.5 group-hover:text-white">
+                    →
+                  </div>
+                </div>
+              </Link>
+
+              <Link
+                href="/about"
+                className="group rounded-2xl border border-white/10 bg-black/30 p-4 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40 hover:shadow-[0_0_20px_rgba(225,6,0,0.18)]"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-medium">About Rufio</div>
+                    <div className="mt-1 text-xs text-white/55">
+                      Intent, sound design, influences
+                    </div>
+                  </div>
+                  <div className="text-sm text-white/60 transition group-hover:translate-x-0.5 group-hover:text-white">
+                    →
+                  </div>
+                </div>
+              </Link>
+
+              <Link
+                href="/contact"
+                className="group rounded-2xl border border-white/10 bg-black/30 p-4 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40 hover:shadow-[0_0_20px_rgba(225,6,0,0.18)]"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-medium">Bookings / collabs</div>
+                    <div className="mt-1 text-xs text-white/55">
+                      Reach out directly
+                    </div>
+                  </div>
+                  <div className="text-sm text-white/60 transition group-hover:translate-x-0.5 group-hover:text-white">
+                    →
+                  </div>
+                </div>
+              </Link>
+            </div>
+
+            <div className="mt-6 border-t border-white/10 pt-5 text-xs text-white/50">
+              <span className="text-white/60">Philadelphia</span> • Available for select dates
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <div className="text-xs uppercase tracking-widest text-white/60">Next up</div>
-          <div className="mt-2 text-white/80">Shows page coming next.</div>
-          <Link className="mt-4 inline-block text-sm text-white/70 hover:text-white" href="/shows">
-            View shows →
-          </Link>
-        </div>
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <div className="text-xs uppercase tracking-widest text-white/60">For industry</div>
-          <div className="mt-2 text-white/80">Booking & press kit.</div>
-          <Link className="mt-4 inline-block text-sm text-white/70 hover:text-white" href="/contact">
-            Contact / Book →
+      {/* FOOTER STRIP */}
+      <section className="mt-14 sm:mt-20">
+        <div className="panel flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="text-sm font-medium">Start with a mix</div>
+            <div className="mt-1 text-xs text-white/60">
+              Clean presentation, proper metadata, no noise.
+            </div>
+          </div>
+          <Link
+            href="/listen"
+            className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/[0.08] px-5 py-3 text-sm font-medium text-white transition duration-200 hover:border-[var(--accent)] hover:bg-white/10 hover:shadow-[0_0_24px_var(--accentSoft)]"
+          >
+            Open Listen →
           </Link>
         </div>
       </section>
-    </div>
+    </main>
   );
 }
