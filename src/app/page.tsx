@@ -4,28 +4,33 @@ export default function HomePage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
       {/* HERO */}
-      <section className="grid gap-10 lg:grid-cols-12 lg:items-start">
+      <section className="grid gap-12 lg:grid-cols-12 lg:items-start">
         <div className="lg:col-span-7">
-          <h1 className="mt-6 text-4xl font-semibold leading-[1.02] tracking-tight sm:text-6xl">
-            Process &amp; Steel.
-            <span className="block text-white/70">
-              Underground sound, carefully built.
-            </span>
-          </h1>
 
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70">
-            DJ mixes, tracklists, and live recordings — presented with restraint.
-            Minimal interface. Maximum intention.
-          </p>
+              <h1 className="text-[2.6rem] font-semibold leading-[1.01] tracking-tight sm:text-[4rem]">
+                <span className="block text-white">
+                  Process &amp; Steel.
+                </span>
+                <span className="block text-white/65">
+                  Underground sound, carefully built.
+                </span>
+              </h1>
 
-          <div className="mt-10 flex flex-wrap items-center gap-3 text-xs text-white/50">
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition duration-200 hover:border-[var(--accent)] hover:bg-white/[0.07] hover:text-white/80">
+              <p className="mt-7 max-w-xl text-[15px] leading-relaxed text-white/70 sm:text-base">
+                DJ mixes, tracklists, and live recordings — presented with restraint.
+                Minimal interface. Maximum intention.
+              </p>
+
+          <div className="mt-10 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-white/50">
+            <span className="rounded-md border border-white/10 bg-black/30 px-3 py-[6px] transition duration-200 hover:border-[var(--accent)] hover:text-white/80">
               melodic techno
             </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition duration-200 hover:border-[var(--accent)] hover:bg-white/[0.07] hover:text-white/80">
+
+            <span className="rounded-md border border-white/10 bg-black/30 px-3 py-[6px] transition duration-200 hover:border-[var(--accent)] hover:text-white/80">
               drum &amp; bass
             </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition duration-200 hover:border-[var(--accent)] hover:bg-white/[0.07] hover:text-white/80">
+
+            <span className="rounded-md border border-white/10 bg-black/30 px-3 py-[6px] transition duration-200 hover:border-[var(--accent)] hover:text-white/80">
               dark / minimal
             </span>
           </div>
@@ -33,38 +38,39 @@ export default function HomePage() {
 
         {/* RIGHT PANEL */}
         <div className="lg:col-span-5">
-          <div className="panel p-6 sm:p-7">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-xs uppercase tracking-widest text-white/50">
-                  Latest
-                </div>
-                <div className="mt-2 text-lg font-semibold">
-                  New mixes &amp; recordings
-                </div>
-                <p className="mt-2 text-sm leading-relaxed text-white/65">
-                  Head to the Listen page for the full archive. Tracklists included.
-                </p>
+          <div className="panel p-7 sm:p-8">
+
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.22em] text-white/45">
+                Archive
               </div>
 
-              <div className="hidden sm:block">
-                <div className="h-10 w-10 rounded-2xl border border-white/10 bg-white/5" />
+              <div className="mt-3 text-xl font-semibold tracking-tight">
+                Mixes & recordings
               </div>
+
+              <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/65">
+                Explore the catalog of published mixes, notes, and tracklists.
+              </p>
             </div>
 
-            <div className="mt-6 grid gap-3">
+            <div className="mt-8 grid gap-3">
+
               <Link
                 href="/listen"
-                className="group rounded-2xl border border-white/10 bg-black/30 p-4 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40 hover:shadow-[0_0_20px_rgba(225,6,0,0.18)]"
+                className="group rounded-xl border border-white/10 bg-black/30 p-4 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <div className="text-sm font-medium">Browse the archive</div>
+                    <div className="text-sm font-medium">
+                      Browse the archive
+                    </div>
                     <div className="mt-1 text-xs text-white/55">
-                      Published mixes, tags, and notes
+                      Published mixes and sessions
                     </div>
                   </div>
-                  <div className="text-sm text-white/60 transition group-hover:translate-x-0.5 group-hover:text-white">
+
+                  <div className="text-sm text-white/55 transition group-hover:translate-x-0.5 group-hover:text-white">
                     →
                   </div>
                 </div>
@@ -72,16 +78,19 @@ export default function HomePage() {
 
               <Link
                 href="/about"
-                className="group rounded-2xl border border-white/10 bg-black/30 p-4 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40 hover:shadow-[0_0_20px_rgba(225,6,0,0.18)]"
+                className="group rounded-xl border border-white/10 bg-black/30 p-4 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <div className="text-sm font-medium">About Rufio</div>
+                    <div className="text-sm font-medium">
+                      About Rufio
+                    </div>
                     <div className="mt-1 text-xs text-white/55">
-                      Intent, sound design, influences
+                      Intent and influences
                     </div>
                   </div>
-                  <div className="text-sm text-white/60 transition group-hover:translate-x-0.5 group-hover:text-white">
+
+                  <div className="text-sm text-white/55 transition group-hover:translate-x-0.5 group-hover:text-white">
                     →
                   </div>
                 </div>
@@ -89,25 +98,30 @@ export default function HomePage() {
 
               <Link
                 href="/contact"
-                className="group rounded-2xl border border-white/10 bg-black/30 p-4 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40 hover:shadow-[0_0_20px_rgba(225,6,0,0.18)]"
+                className="group rounded-xl border border-white/10 bg-black/30 p-4 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <div className="text-sm font-medium">Bookings / collabs</div>
+                    <div className="text-sm font-medium">
+                      Bookings / collabs
+                    </div>
                     <div className="mt-1 text-xs text-white/55">
                       Reach out directly
                     </div>
                   </div>
-                  <div className="text-sm text-white/60 transition group-hover:translate-x-0.5 group-hover:text-white">
+
+                  <div className="text-sm text-white/55 transition group-hover:translate-x-0.5 group-hover:text-white">
                     →
                   </div>
                 </div>
               </Link>
+
             </div>
 
-            <div className="mt-6 border-t border-white/10 pt-5 text-xs text-white/50">
-              <span className="text-white/60">Philadelphia</span> • Available for select dates
+            <div className="mt-8 border-t border-white/10 pt-5 text-[11px] uppercase tracking-[0.18em] text-white/45">
+              Philadelphia · Available for select dates
             </div>
+
           </div>
         </div>
       </section>
@@ -121,9 +135,10 @@ export default function HomePage() {
               Clean presentation, proper metadata, no noise.
             </div>
           </div>
+
           <Link
             href="/listen"
-            className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/[0.08] px-5 py-3 text-sm font-medium text-white transition duration-200 hover:border-[var(--accent)] hover:bg-white/10 hover:shadow-[0_0_24px_var(--accentSoft)]"
+            className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/[0.08] px-5 py-3 text-sm font-medium text-white transition duration-200 hover:border-[var(--accent)] hover:bg-white/[0.10] hover:shadow-[0_0_24px_var(--accentSoft)]"
           >
             Open Listen →
           </Link>
