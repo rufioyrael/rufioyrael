@@ -1,50 +1,5 @@
 import Link from "next/link";
-
-type Mix = {
-  slug: string;
-  title: string;
-  date: string;
-  runtime: string;
-  tags: string[];
-  note: string;
-  featured?: boolean;
-};
-
-const mixes: Mix[] = [
-  {
-    slug: "process-steel-001",
-    title: "Process / Steel 001",
-    date: "March 2026",
-    runtime: "58 min",
-    tags: ["melodic techno", "dark", "driving"],
-    note: "A late-night session built around tension, movement, and long-form transitions.",
-    featured: true,
-  },
-  {
-    slug: "ember-line-session",
-    title: "Ember Line Session",
-    date: "February 2026",
-    runtime: "47 min",
-    tags: ["drum & bass", "atmospheric"],
-    note: "Fast, clean selections with darker low-end and restrained pacing.",
-  },
-  {
-    slug: "after-hours-study",
-    title: "After Hours Study",
-    date: "January 2026",
-    runtime: "62 min",
-    tags: ["minimal", "hypnotic"],
-    note: "A slower and more patient mix focused on texture and long transitions.",
-  },
-  {
-    slug: "warehouse-notes-002",
-    title: "Warehouse Notes 002",
-    date: "December 2025",
-    runtime: "54 min",
-    tags: ["melodic techno", "industrial"],
-    note: "Percussive framework, darker melodic phrasing, and a heavier closing stretch.",
-  },
-];
+import { mixes } from "@/lib/mixes";
 
 const featuredMix = mixes.find((mix) => mix.featured);
 const archiveMixes = mixes.filter((mix) => !mix.featured);
@@ -95,7 +50,7 @@ export default function ListenPage() {
                 </h2>
 
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-[15px]">
-                  {featuredMix.note}
+                  {featuredMix.description}
                 </p>
 
                 <div className="mt-6 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-white/50">
@@ -157,7 +112,7 @@ export default function ListenPage() {
                   </h3>
 
                   <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/65">
-                    {mix.note}
+                    {mix.description}
                   </p>
 
                   <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-white/50">
@@ -173,7 +128,7 @@ export default function ListenPage() {
                 </div>
 
                 <div className="flex items-center gap-3 text-sm text-white/55 transition group-hover:text-white md:pl-6">
-                  <span className="uppercase tracking-[0.18em] text-[11px] text-white/40">
+                  <span className="text-[11px] uppercase tracking-[0.18em] text-white/40">
                     Open
                   </span>
                   <span className="transition group-hover:translate-x-0.5">→</span>
