@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { mixes } from "@/lib/mixes";
+import { getPublishedMixes } from "@/lib/mixes";
 
-const featuredMix = mixes.find((mix) => mix.featured);
-const archiveMixes = mixes.filter((mix) => !mix.featured);
+export default async function ListenPage() {
+  const mixes = await getPublishedMixes();
+  const featuredMix = mixes.find((mix) => mix.featured);
+  const archiveMixes = mixes.filter((mix) => !mix.featured);
 
-export default function ListenPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
-      {/* PAGE HEADER */}
       <section className="max-w-3xl">
         <div className="text-[11px] uppercase tracking-[0.22em] text-white/45">
           Archive
@@ -26,7 +26,6 @@ export default function ListenPage() {
         </p>
       </section>
 
-      {/* FEATURED */}
       {featuredMix ? (
         <section className="mt-14 sm:mt-16">
           <div className="mb-5 text-[11px] uppercase tracking-[0.22em] text-white/45">
@@ -86,7 +85,6 @@ export default function ListenPage() {
         </section>
       ) : null}
 
-      {/* ARCHIVE LIST */}
       <section className="mt-16 sm:mt-20">
         <div className="mb-5 text-[11px] uppercase tracking-[0.22em] text-white/45">
           Archive entries

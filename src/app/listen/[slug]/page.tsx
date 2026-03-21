@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { mixes } from "@/lib/mixes";
+import {
+  getPublishedMixBySlug,
+  getPublishedMixes,
+} from "@/lib/mixes";
 
 type PageProps = {
   params: Promise<{
@@ -8,38 +11,41 @@ type PageProps = {
   }>;
 };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const mixes = await getPublishedMixes();
+
   return mixes.map((mix) => ({
     slug: mix.slug,
   }));
 }
 
-export function generateMetadata({ params }: PageProps) {
-  return params.then(({ slug }) => {
-    const mix = mixes.find((item) => item.slug === slug);
+export async function generateMetadata({ params }: PageProps) {
+  const { slug } = await params;
+  const mix = await getPublishedMixBySlug(slug);
 
-    if (!mix) {
-      return {
-        title: "Mix Not Found | Rufio Yrael",
-      };
-    }
-
+  if (!mix) {
     return {
-      title: `${mix.title} | Rufio Yrael`,
-      description: mix.description,
+      title: "Mix Not Found | Rufio Yrael",
     };
-  });
+  }
+
+  return {
+    title: `${mix.title} | Rufio Yrael`,
+    description: mix.description,
+  };
 }
 
 export default async function MixDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const mixIndex = mixes.findIndex((item) => item.slug === slug);
+  const mix = await getPublishedMixBySlug(slug);
 
-  if (mixIndex === -1) {
+  if (!mix) {
     notFound();
   }
 
-  const mix = mixes[mixIndex];
+  const mixes = await getPublishedMixes();
+  const mixIndex = mixes.findIndex((item) => item.slug === slug);
+
   const previousMix = mixIndex > 0 ? mixes[mixIndex - 1] : null;
   const nextMix = mixIndex < mixes.length - 1 ? mixes[mixIndex + 1] : null;
 

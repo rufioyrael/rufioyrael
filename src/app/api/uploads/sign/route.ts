@@ -33,7 +33,7 @@ function isAllowedAdmin(userId: string | undefined) {
 }
 
 async function requireAdmin() {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const { data, error } = await supabase.auth.getUser();
   const user = data?.user;
 
