@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import MixPlaybackPanel from "@/components/MixPlaybackPanel";
 import {
   getPublishedMixBySlug,
   getPublishedMixes,
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: PageProps) {
 
   return {
     title: `${mix.title} | Rufio Yrael`,
-    description: mix.description,
+    description: mix.description ?? undefined,
   };
 }
 
@@ -45,13 +46,14 @@ export default async function MixDetailPage({ params }: PageProps) {
 
   const mixes = await getPublishedMixes();
   const mixIndex = mixes.findIndex((item) => item.slug === slug);
+  const trackCount = mix.tracklist.length;
+  const detailMeta = [mix.date, mix.runtime].filter(Boolean);
 
   const previousMix = mixIndex > 0 ? mixes[mixIndex - 1] : null;
   const nextMix = mixIndex < mixes.length - 1 ? mixes[mixIndex + 1] : null;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
-      {/* TOP LINK */}
       <div>
         <Link
           href="/listen"
@@ -62,22 +64,26 @@ export default async function MixDetailPage({ params }: PageProps) {
         </Link>
       </div>
 
-      {/* HERO */}
-      <section className="mt-8 grid gap-10 lg:grid-cols-12 lg:items-start">
-        <div className="lg:col-span-7">
+      <section className="mt-8">
+        <div className="max-w-3xl">
           <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">
-            <span>{mix.date}</span>
-            <span className="text-white/20">•</span>
-            <span>{mix.runtime}</span>
+            {detailMeta.map((part, index) => (
+              <div key={`${part}-${index}`} className="flex items-center gap-3">
+                {index > 0 ? <span className="text-white/20">•</span> : null}
+                <span>{part}</span>
+              </div>
+            ))}
           </div>
 
           <h1 className="mt-4 text-[2.4rem] font-semibold leading-[1.01] tracking-tight sm:text-[3.5rem]">
             <span className="block text-white">{mix.title}</span>
           </h1>
 
-          <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-white/70 sm:text-base">
-            {mix.description}
-          </p>
+          {mix.description ? (
+            <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-white/70 sm:text-base">
+              {mix.description}
+            </p>
+          ) : null}
 
           <div className="mt-8 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-white/50">
             {mix.tags.map((tag) => (
@@ -90,79 +96,59 @@ export default async function MixDetailPage({ params }: PageProps) {
             ))}
           </div>
         </div>
+      </section>
 
-        {/* PLAYER PANEL */}
-        <div className="lg:col-span-5">
-          <div className="panel p-6 sm:p-7">
-            <div className="text-[11px] uppercase tracking-[0.22em] text-white/45">
-              Playback
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-5">
-              <div className="flex gap-4">
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
-                  <div className="h-8 w-8 rounded-full border border-white/10 bg-black/40" />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium text-white">
-                    {mix.title}
-                  </div>
-                  <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/45">
-                    Rufio Yrael
-                  </div>
-                  <p className="mt-3 text-sm leading-relaxed text-white/60">
-                    Playback module placeholder for your hosted mix audio.
-                  </p>
-                </div>
+      <section className="mt-10 sm:mt-12">
+        <div className="mx-auto max-w-5xl">
+          {mix.audioUrl ? (
+            <MixPlaybackPanel
+              src={mix.audioUrl}
+              title={mix.title}
+              coverImageUrl={mix.coverImageUrl}
+              runtime={mix.runtime ?? undefined}
+            />
+          ) : (
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-5 py-4 shadow-[0_24px_80px_rgba(0,0,0,0.30)] sm:px-6 sm:py-5">
+              <div className="pointer-events-none absolute inset-0">
+                <div className="absolute -right-10 top-0 h-32 w-32 rounded-full bg-[var(--accent)]/10 blur-3xl" />
               </div>
 
-              <div className="mt-5 flex items-center gap-3">
-                <button
-                  type="button"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white/80 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-                  aria-label="Play preview"
-                >
-                  ▶
-                </button>
-
-                <div className="flex-1">
-                  <div className="h-2 rounded-full bg-white/[0.06]">
-                    <div className="h-2 w-[22%] rounded-full bg-white/[0.22]" />
+              <div className="relative">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[1.25rem] border border-white/10 bg-black/35 sm:h-24 sm:w-24">
+                    <div className="h-8 w-8 rounded-full border border-white/10 bg-white/[0.04]" />
                   </div>
 
-                  <div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-white/40">
-                    <span>00:00</span>
-                    <span>{mix.runtime}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-base font-semibold tracking-tight text-white sm:text-[1.2rem]">
+                      {mix.title}
+                    </div>
+                    <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/55">
+                      This archive entry is published, but hosted audio has not
+                      been attached yet.
+                    </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-2 text-center text-[11px] uppercase tracking-[0.18em] text-white/40">
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                  Mix
+                <div className="mt-5 rounded-xl border border-white/8 bg-[#131317] px-3 py-3">
+                  <div className="h-2 rounded-full bg-[#232329]">
+                    <div className="h-2 w-[22%] rounded-full bg-[rgba(164,44,36,0.72)]" />
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-white/40">
+                    <span>Awaiting audio</span>
+                    <span>{mix.runtime || "Unlisted"}</span>
+                  </div>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                  Tracklist
-                </div>
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                  Archive
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/45">
-                Live audio integration coming soon
               </div>
             </div>
+          )}
 
-            <div className="mt-6 border-t border-white/10 pt-5 text-[11px] uppercase tracking-[0.18em] text-white/45">
-              Published mix · Tracklist below
-            </div>
+          <div className="mt-6 border-t border-white/10 pt-5 text-center text-[11px] uppercase tracking-[0.18em] text-white/45">
+            Published mix · {trackCount} tracks in sequence
           </div>
         </div>
       </section>
 
-      {/* TRACKLIST */}
       <section className="mt-16 sm:mt-20">
         <div className="mb-5 text-[11px] uppercase tracking-[0.22em] text-white/45">
           Tracklist
@@ -187,7 +173,6 @@ export default async function MixDetailPage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* NAVIGATION */}
       <section className="mt-14 sm:mt-16">
         <div className="grid gap-3 sm:grid-cols-2">
           {previousMix ? (
@@ -201,8 +186,18 @@ export default async function MixDetailPage({ params }: PageProps) {
               <div className="mt-2 text-sm font-medium text-white">
                 {previousMix.title}
               </div>
-              <div className="mt-1 text-xs text-white/55">
-                {previousMix.date} · {previousMix.runtime}
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-white/55">
+                {[previousMix.date, previousMix.runtime]
+                  .filter(Boolean)
+                  .map((part, index) => (
+                    <div
+                      key={`${previousMix.slug}-${part}-${index}`}
+                      className="flex items-center gap-2"
+                    >
+                      {index > 0 ? <span className="text-white/25">•</span> : null}
+                      <span>{part}</span>
+                    </div>
+                  ))}
               </div>
             </Link>
           ) : (
@@ -225,8 +220,18 @@ export default async function MixDetailPage({ params }: PageProps) {
               <div className="mt-2 text-sm font-medium text-white">
                 {nextMix.title}
               </div>
-              <div className="mt-1 text-xs text-white/55">
-                {nextMix.date} · {nextMix.runtime}
+              <div className="mt-1 flex flex-wrap items-center justify-end gap-2 text-xs text-white/55">
+                {[nextMix.date, nextMix.runtime]
+                  .filter(Boolean)
+                  .map((part, index) => (
+                    <div
+                      key={`${nextMix.slug}-${part}-${index}`}
+                      className="flex items-center gap-2"
+                    >
+                      {index > 0 ? <span className="text-white/25">•</span> : null}
+                      <span>{part}</span>
+                    </div>
+                  ))}
               </div>
             </Link>
           ) : (

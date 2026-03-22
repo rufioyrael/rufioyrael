@@ -1,112 +1,316 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
 import { supabaseServer } from "@/lib/supabase/server";
+import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+
+function getAllowedAdmins() {
+  return (process.env.ADMIN_USER_IDS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function isAllowedAdmin(userId: string) {
+  return getAllowedAdmins().includes(userId);
+}
 
 function sanitizeSlug(input: string) {
   return String(input ?? "")
     .toLowerCase()
     .trim()
+    .replace(/['"]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+    .replace(/^-+|-+$/g, "");
 }
 
-function isProd() {
-  return process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
-}
-
-function adminApiEnabled() {
-  if (!isProd()) return true;
-  return process.env.ADMIN_API_ENABLED === "true";
-}
-
-function isAllowedAdmin(userId: string | undefined) {
-  if (!userId) return false;
-  const allow = (process.env.ADMIN_USER_IDS || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return allow.includes(userId);
-}
+type CreateMixBody = {
+  id?: string;
+  slug?: string;
+  title?: string;
+  dateLabel?: string;
+  runtime?: string;
+  description?: string;
+  tags?: string[];
+  tracklist?: string[];
+  featured?: boolean;
+  published?: boolean;
+  audioUrl?: string | null;
+  coverImageUrl?: string | null;
+};
 
 async function requireAdmin() {
+  // API routes re-check admin access even though /admin UI is guarded in proxy.ts.
+  // This keeps write endpoints protected if they are ever called directly.
   const supabase = await supabaseServer();
-  const { data, error } = await supabase.auth.getUser();
-  const user = data?.user;
 
-  if (error || !user || !isAllowedAdmin(user.id)) {
-    return {
-      ok: false as const,
-      res: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-    };
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
-  return { ok: true as const, user };
+  if (!isAllowedAdmin(user.id)) {
+    return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+  }
+
+  return { user };
 }
 
 export async function GET() {
-  // If you want this to serve public mixes later, implement it explicitly.
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
+  try {
+    const auth = await requireAdmin();
+    if ("error" in auth) return auth.error;
+
+    const admin = getSupabaseAdminClient();
+
+    // Return the fuller admin-facing shape so the CMS page can edit records
+    // in place without fetching each mix again individually.
+    const { data, error } = await admin
+      .from("mixes")
+      .select(
+        "id, slug, title, date_label, runtime, description, tags, tracklist, published, featured, audio_url, cover_image_url, created_at"
+      )
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ ok: true, mixes: data ?? [] });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch mixes.";
+
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
-  // Optional prod gate
-  if (!adminApiEnabled()) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
-  // ✅ Auth check (cookie-based)
-  const admin = await requireAdmin();
-  if (!admin.ok) return admin.res;
-
   try {
-    const body = await req.json().catch(() => ({}));
+    const auth = await requireAdmin();
+    if ("error" in auth) return auth.error;
 
-    const slug = sanitizeSlug(body?.slug);
-    const title = String(body?.title ?? "").trim();
-    const audio_url = String(body?.audio_url ?? "").trim();
+    const body = (await req.json()) as CreateMixBody;
 
-    if (!slug || !title || !audio_url) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+    const title = String(body.title ?? "").trim();
+    const slug = sanitizeSlug(body.slug ?? title);
+    const dateLabel = String(body.dateLabel ?? "").trim();
+    const runtime = String(body.runtime ?? "").trim();
+    const description = String(body.description ?? "").trim();
 
-    const tags = Array.isArray(body?.tags)
-      ? body.tags.map((t: any) => String(t).trim()).filter(Boolean)
+    const audioUrl =
+      body.audioUrl && String(body.audioUrl).trim()
+        ? String(body.audioUrl).trim()
+        : null;
+
+    const coverImageUrl =
+      body.coverImageUrl && String(body.coverImageUrl).trim()
+        ? String(body.coverImageUrl).trim()
+        : null;
+
+    const tags = Array.isArray(body.tags)
+      ? body.tags.map((tag) => String(tag).trim()).filter(Boolean)
       : [];
 
-    const payload = {
-      slug,
-      title,
-      audio_url,
-      published: body?.published ?? true,
-      date: body?.date ?? new Date().toISOString(),
-      cover_url: body?.cover_url ?? null,
-      tags,
-      description: body?.description ?? null,
-      tracklist: Array.isArray(body?.tracklist) ? body.tracklist : [],
-      duration_sec: body?.duration_sec ?? null,
-    };
+    const tracklist = Array.isArray(body.tracklist)
+      ? body.tracklist.map((item) => String(item).trim()).filter(Boolean)
+      : [];
 
-    const sb = supabaseAdmin();
-    const { data, error } = await sb
-      .from("mixes")
-      .upsert(payload, { onConflict: "slug" })
-      .select("*")
-      .single();
+    const featured = Boolean(body.featured);
+    const published = Boolean(body.published);
 
-    if (error) {
+    if (!title) {
+      return NextResponse.json({ error: "Missing title." }, { status: 400 });
+    }
+
+    if (!slug) {
+      return NextResponse.json({ error: "Missing slug." }, { status: 400 });
+    }
+
+    if (!dateLabel) {
+      return NextResponse.json({ error: "Missing date." }, { status: 400 });
+    }
+
+    if (!runtime) {
+      return NextResponse.json({ error: "Missing runtime." }, { status: 400 });
+    }
+
+    if (!description) {
       return NextResponse.json(
-        {
-          error: error.message,
-          details: error.details ?? null,
-          hint: error.hint ?? null,
-          code: error.code ?? null,
-        },
+        { error: "Missing description." },
         { status: 400 }
       );
     }
 
-    return NextResponse.json({ mix: data });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Failed" }, { status: 500 });
+    const admin = getSupabaseAdminClient();
+
+    // Admin writes use the service-role client here so UI-level admin auth
+    // stays separate from public read RLS policies.
+    const { data, error } = await admin
+      .from("mixes")
+      .insert({
+        slug,
+        title,
+        date_label: dateLabel,
+        runtime,
+        description,
+        tags,
+        tracklist,
+        featured,
+        published,
+        audio_url: audioUrl,
+        cover_image_url: coverImageUrl,
+      })
+      .select("id, slug, title, published, featured, audio_url, cover_image_url")
+      .single();
+
+    if (error) {
+      const message =
+        error.code === "23505"
+          ? "A mix with that slug already exists."
+          : error.message;
+
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+
+    return NextResponse.json({ ok: true, mix: data });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to create mix.";
+
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const auth = await requireAdmin();
+    if ("error" in auth) return auth.error;
+
+    const body = (await req.json()) as { id?: string };
+    const id = String(body.id ?? "").trim();
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing mix id." }, { status: 400 });
+    }
+
+    const admin = getSupabaseAdminClient();
+
+    const { error } = await admin.from("mixes").delete().eq("id", id);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to delete mix.";
+
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const auth = await requireAdmin();
+    if ("error" in auth) return auth.error;
+
+    const body = (await req.json()) as CreateMixBody;
+    const id = String(body.id ?? "").trim();
+    const title = String(body.title ?? "").trim();
+    const slug = sanitizeSlug(body.slug ?? title);
+    const dateLabel = String(body.dateLabel ?? "").trim();
+    const runtime = String(body.runtime ?? "").trim();
+    const description = String(body.description ?? "").trim();
+
+    const audioUrl =
+      body.audioUrl && String(body.audioUrl).trim()
+        ? String(body.audioUrl).trim()
+        : null;
+
+    const coverImageUrl =
+      body.coverImageUrl && String(body.coverImageUrl).trim()
+        ? String(body.coverImageUrl).trim()
+        : null;
+
+    const tags = Array.isArray(body.tags)
+      ? body.tags.map((tag) => String(tag).trim()).filter(Boolean)
+      : [];
+
+    const tracklist = Array.isArray(body.tracklist)
+      ? body.tracklist.map((item) => String(item).trim()).filter(Boolean)
+      : [];
+
+    const featured = Boolean(body.featured);
+    const published = Boolean(body.published);
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing mix id." }, { status: 400 });
+    }
+
+    if (!title) {
+      return NextResponse.json({ error: "Missing title." }, { status: 400 });
+    }
+
+    if (!slug) {
+      return NextResponse.json({ error: "Missing slug." }, { status: 400 });
+    }
+
+    if (!dateLabel) {
+      return NextResponse.json({ error: "Missing date." }, { status: 400 });
+    }
+
+    if (!runtime) {
+      return NextResponse.json({ error: "Missing runtime." }, { status: 400 });
+    }
+
+    if (!description) {
+      return NextResponse.json(
+        { error: "Missing description." },
+        { status: 400 }
+      );
+    }
+
+    const admin = getSupabaseAdminClient();
+
+    // PATCH mirrors POST validation so quick actions and full-form edits save
+    // the same normalized shape back into the table.
+    const { data, error } = await admin
+      .from("mixes")
+      .update({
+        slug,
+        title,
+        date_label: dateLabel,
+        runtime,
+        description,
+        tags,
+        tracklist,
+        featured,
+        published,
+        audio_url: audioUrl,
+        cover_image_url: coverImageUrl,
+      })
+      .eq("id", id)
+      .select("id, slug, title, published, featured, audio_url, cover_image_url")
+      .single();
+
+    if (error) {
+      const message =
+        error.code === "23505"
+          ? "A mix with that slug already exists."
+          : error.message;
+
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+
+    return NextResponse.json({ ok: true, mix: data });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to update mix.";
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

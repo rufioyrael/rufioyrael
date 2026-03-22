@@ -3,15 +3,15 @@ import { createClient } from "@supabase/supabase-js";
 export type Mix = {
   slug: string;
   title: string;
-  date: string;
-  runtime: string;
+  date: string | null;
+  runtime: string | null;
   tags: string[];
-  description: string;
+  description: string | null;
   tracklist: string[];
-  featured?: boolean;
-  published?: boolean;
-  audioUrl?: string | null;
-  coverImageUrl?: string | null;
+  featured: boolean;
+  published: boolean;
+  audioUrl: string | null;
+  coverImageUrl: string | null;
 };
 
 type MixRow = {
@@ -37,7 +37,10 @@ function getPublicSupabaseClient() {
 
 function normalizeTracklist(value: unknown): string[] {
   if (Array.isArray(value)) {
-    return value.filter((item): item is string => typeof item === "string");
+    return value
+      .filter((item): item is string => typeof item === "string")
+      .map((item) => item.trim())
+      .filter(Boolean);
   }
 
   if (typeof value === "string") {
@@ -50,19 +53,36 @@ function normalizeTracklist(value: unknown): string[] {
   return [];
 }
 
+function normalizeText(value: string | null): string | null {
+  const normalized = value?.trim();
+  return normalized ? normalized : null;
+}
+
+function normalizeTags(value: string[] | null): string[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.map((tag) => tag.trim()).filter(Boolean);
+}
+
+function normalizeUrl(value: string | null): string | null {
+  const normalized = value?.trim();
+  return normalized ? normalized : null;
+}
+
 function mapRowToMix(row: MixRow): Mix {
+  // Normalize DB rows once here so rendering code can work with a consistent shape.
   return {
-    slug: row.slug,
-    title: row.title,
-    date: row.date_label ?? "",
-    runtime: row.runtime ?? "",
-    tags: row.tags ?? [],
-    description: row.description ?? "",
+    slug: row.slug.trim(),
+    title: row.title.trim(),
+    date: normalizeText(row.date_label),
+    runtime: normalizeText(row.runtime),
+    tags: normalizeTags(row.tags),
+    description: normalizeText(row.description),
     tracklist: normalizeTracklist(row.tracklist),
     featured: row.featured ?? false,
     published: row.published ?? false,
-    audioUrl: row.audio_url,
-    coverImageUrl: row.cover_image_url,
+    audioUrl: normalizeUrl(row.audio_url),
+    coverImageUrl: normalizeUrl(row.cover_image_url),
   };
 }
 

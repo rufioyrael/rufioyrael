@@ -8,12 +8,14 @@ function getAllowedAdmins() {
     .filter(Boolean);
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const res = NextResponse.next();
 
-  // Only guard /admin routes (matcher also does this, but keeping is fine)
+  // Keep the guard scoped to /admin so public routes stay cache-friendly.
   if (!req.nextUrl.pathname.startsWith("/admin")) return res;
 
+  // Read the session from request cookies at the edge so /admin never renders
+  // for unauthenticated or non-whitelisted users.
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -36,6 +38,8 @@ export async function middleware(req: NextRequest) {
   const isAdmin = !!user && !error && allowed.includes(user.id);
 
   if (!isAdmin) {
+    // Preserve the intended destination so login can bounce admins back into
+    // the exact admin screen they were trying to open.
     const url = req.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", req.nextUrl.pathname);

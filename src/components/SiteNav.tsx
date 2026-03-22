@@ -27,10 +27,6 @@ export default function SiteNav() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 8);
     };
@@ -98,13 +94,6 @@ export default function SiteNav() {
 
             <div className="ml-2 flex items-center gap-2">
               <Link
-                href="/listen"
-                className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/78 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-              >
-                Browse
-              </Link>
-
-              <Link
                 href="/contact"
                 className="rounded-full border border-[color:var(--accent)]/30 bg-[color:var(--accent)]/[0.14] px-4 py-2 text-sm text-white transition hover:border-[color:var(--accent)]/45 hover:bg-[color:var(--accent)]/[0.18]"
               >
@@ -139,12 +128,13 @@ export default function SiteNav() {
                   const active = isActive(pathname, item.href);
 
                   return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={[
-                        "rounded-2xl px-4 py-3 text-sm transition",
-                        active
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMenuOpen(false)}
+                    className={[
+                      "rounded-2xl px-4 py-3 text-sm transition",
+                      active
                           ? "bg-white/[0.08] text-white"
                           : "text-white/68 hover:bg-white/[0.05] hover:text-white",
                       ].join(" ")}
@@ -158,15 +148,10 @@ export default function SiteNav() {
 
               <div className="my-3 h-px bg-white/8" />
 
-              <div className="grid grid-cols-2 gap-2">
-                <Link
-                  href="/listen"
-                  className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center text-sm text-white/78 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-                >
-                  Browse
-                </Link>
+              <div className="grid grid-cols-1 gap-2">
                 <Link
                   href="/contact"
+                  onClick={() => setMenuOpen(false)}
                   className="rounded-2xl border border-[color:var(--accent)]/30 bg-[color:var(--accent)]/[0.14] px-4 py-3 text-center text-sm text-white transition hover:border-[color:var(--accent)]/45 hover:bg-[color:var(--accent)]/[0.18]"
                 >
                   Bookings / Collabs

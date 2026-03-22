@@ -1,10 +1,18 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getPublishedMixes } from "@/lib/mixes";
 
 export default async function ListenPage() {
   const mixes = await getPublishedMixes();
-  const featuredMix = mixes.find((mix) => mix.featured);
-  const archiveMixes = mixes.filter((mix) => !mix.featured);
+  // Keep the top slot populated even if no row is explicitly marked featured.
+  const featuredMix = mixes.find((mix) => mix.featured) ?? mixes[0] ?? null;
+  const archiveMixes = featuredMix
+    ? mixes.filter((mix) => mix.slug !== featuredMix.slug)
+    : mixes;
+  const archiveCount = archiveMixes.length;
+  const featuredMeta = featuredMix
+    ? [featuredMix.date, featuredMix.runtime].filter(Boolean)
+    : [];
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
@@ -29,30 +37,49 @@ export default async function ListenPage() {
       {featuredMix ? (
         <section className="mt-14 sm:mt-16">
           <div className="mb-5 text-[11px] uppercase tracking-[0.22em] text-white/45">
-            Latest
+            Featured release
           </div>
 
           <Link
             href={`/listen/${featuredMix.slug}`}
-            className="group block rounded-3xl border border-white/10 bg-black/30 p-6 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40 hover:shadow-[0_0_24px_rgba(225,6,0,0.16)] sm:p-8"
+            className="group relative block overflow-hidden rounded-[2rem] border border-white/10 bg-black/40 p-6 transition duration-300 hover:border-[var(--accent)] hover:bg-black/50 hover:shadow-[0_0_32px_rgba(225,6,0,0.14)] sm:p-7 lg:p-8"
           >
-            <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
-              <div className="lg:col-span-8">
-                <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">
-                  <span>{featuredMix.date}</span>
-                  <span className="text-white/20">•</span>
-                  <span>{featuredMix.runtime}</span>
-                </div>
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
+              <div className="absolute -right-16 top-8 h-36 w-36 rounded-full bg-[var(--accent)]/12 blur-3xl transition duration-300 group-hover:bg-[var(--accent)]/18" />
+              <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.04),transparent_32%,transparent_65%,rgba(225,6,0,0.08))]" />
+            </div>
 
-                <h2 className="mt-4 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+            <div className="relative mb-3 flex justify-start lg:mb-0 lg:justify-end">
+              <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-white/45">
+                <span className="rounded-full border border-[var(--accent)]/25 bg-[var(--accent)]/10 px-3 py-1 text-white/78">
+                  Featured
+                </span>
+                {featuredMeta.map((part, index) => (
+                  <div
+                    key={`${part}-${index}`}
+                    className="flex items-center gap-3"
+                  >
+                    {index > 0 ? <span className="text-white/20">•</span> : null}
+                    <span>{part}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative grid gap-6 lg:grid-cols-12 lg:items-start">
+              <div className={featuredMix.coverImageUrl ? "lg:col-span-7" : "lg:col-span-12"}>
+                <h2 className="max-w-3xl text-[2rem] font-semibold leading-[0.98] tracking-tight text-white sm:text-[3rem] lg:pt-[2px]">
                   {featuredMix.title}
                 </h2>
 
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-[15px]">
-                  {featuredMix.description}
-                </p>
+                {featuredMix.description ? (
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-[15px]">
+                    {featuredMix.description}
+                  </p>
+                ) : null}
 
-                <div className="mt-6 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-white/50">
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-white/50">
                   {featuredMix.tags.map((tag) => (
                     <span
                       key={tag}
@@ -62,32 +89,81 @@ export default async function ListenPage() {
                     </span>
                   ))}
                 </div>
-              </div>
 
-              <div className="lg:col-span-4 lg:flex lg:justify-end">
-                <div className="flex h-full min-h-[160px] w-full items-end justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 lg:max-w-[240px]">
-                  <div>
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/40">
-                      Open
+                <div className="mt-4 grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-4">
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/38">
+                      Runtime
                     </div>
-                    <div className="mt-2 text-sm text-white/70">
-                      Mix page / tracklist
+                    <div className="mt-2 text-sm text-white/82">
+                      {featuredMix.runtime || "Unlisted"}
                     </div>
                   </div>
 
-                  <div className="text-lg text-white/55 transition group-hover:translate-x-1 group-hover:text-white">
-                    →
+                  <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-4">
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/38">
+                      Track count
+                    </div>
+                    <div className="mt-2 text-sm text-white/82">
+                      {featuredMix.tracklist.length || "TBA"}
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-4">
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/38">
+                      Archive
+                    </div>
+                    <div className="mt-2 text-sm text-white/82">
+                      Highlighted release
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {featuredMix.coverImageUrl ? (
+                <div className="lg:col-span-5 lg:flex lg:justify-end">
+                  <div className="relative w-full max-w-[340px] lg:max-w-[360px]">
+                    <div className="absolute inset-x-8 bottom-0 top-8 rounded-full bg-[var(--accent)]/14 blur-3xl transition duration-300 group-hover:bg-[var(--accent)]/18" />
+                    <div className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-3 shadow-[0_24px_80px_rgba(0,0,0,0.34)]">
+                      <div className="overflow-hidden rounded-[1.1rem] border border-white/8 bg-black/40">
+                        <Image
+                          src={featuredMix.coverImageUrl}
+                          alt={`${featuredMix.title} cover`}
+                          width={720}
+                          height={720}
+                          unoptimized
+                          className="aspect-square w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                        />
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between px-1 text-[10px] uppercase tracking-[0.22em] text-white/40">
+                        <span>Archive select</span>
+                        <span>{featuredMix.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </Link>
         </section>
       ) : null}
 
       <section className="mt-16 sm:mt-20">
-        <div className="mb-5 text-[11px] uppercase tracking-[0.22em] text-white/45">
-          Archive entries
+        <div className="mb-5 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.22em] text-white/45">
+              Archive entries
+            </div>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/55">
+              The full sequence beneath the current highlighted release, ordered
+              for browsing rather than feed-style churn.
+            </p>
+          </div>
+
+          <div className="text-[11px] uppercase tracking-[0.22em] text-white/35">
+            {archiveCount} published {archiveCount === 1 ? "entry" : "entries"}
+          </div>
         </div>
 
         <div className="grid gap-3">
@@ -98,30 +174,57 @@ export default async function ListenPage() {
               className="group rounded-2xl border border-white/10 bg-black/30 p-5 transition duration-200 hover:border-[var(--accent)] hover:bg-black/40"
             >
               <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">
-                    <span>{mix.date}</span>
-                    <span className="text-white/20">•</span>
-                    <span>{mix.runtime}</span>
-                  </div>
+                <div className="flex min-w-0 gap-4">
+                  {mix.coverImageUrl ? (
+                    <div className="hidden sm:block">
+                      <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
+                        <Image
+                          src={mix.coverImageUrl}
+                          alt={`${mix.title} cover`}
+                          width={160}
+                          height={160}
+                          unoptimized
+                          className="h-20 w-20 object-cover transition duration-300 group-hover:scale-[1.03]"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
 
-                  <h3 className="mt-3 text-lg font-semibold tracking-tight text-white">
-                    {mix.title}
-                  </h3>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">
+                      {[mix.date, mix.runtime].filter(Boolean).map((part, index) => (
+                        <div
+                          key={`${mix.slug}-${part}-${index}`}
+                          className="flex items-center gap-3"
+                        >
+                          {index > 0 ? (
+                            <span className="text-white/20">•</span>
+                          ) : null}
+                          <span>{part}</span>
+                        </div>
+                      ))}
+                    </div>
 
-                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/65">
-                    {mix.description}
-                  </p>
+                    <h3 className="mt-3 text-lg font-semibold tracking-tight text-white">
+                      {mix.title}
+                    </h3>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-white/50">
-                    {mix.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-md border border-white/10 bg-black/30 px-3 py-[6px]"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                    {mix.description ? (
+                      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/65">
+                        {mix.description}
+                      </p>
+                    ) : null}
+
+                    <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-white/50">
+                      {mix.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-md border border-white/10 bg-black/30 px-3 py-[6px]"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 

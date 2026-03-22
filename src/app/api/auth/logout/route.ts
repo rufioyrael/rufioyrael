@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import type { CookieOptions } from "@supabase/ssr";
 
 export async function POST() {
-  // ✅ In your setup, cookies() is async
   const cookieStore = await cookies();
 
   const supabase = createServerClient(
@@ -15,13 +15,11 @@ export async function POST() {
           return cookieStore.get(name)?.value;
         },
 
-        // ✅ Use the 3-arg signature (works in more Next versions)
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options: CookieOptions) {
           cookieStore.set(name, value, options);
         },
 
-        // ✅ Clear cookie
-        remove(name: string, options: any) {
+        remove(name: string, options: CookieOptions) {
           cookieStore.set(name, "", { ...options, maxAge: 0 });
         },
       },
