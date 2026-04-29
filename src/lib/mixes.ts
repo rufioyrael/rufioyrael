@@ -98,7 +98,7 @@ export async function getPublishedMixes(): Promise<Mix[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Failed to fetch published mixes:", error);
+    console.error("Failed to fetch published mixes:", error.message ?? JSON.stringify(error));
     return [];
   }
 
@@ -118,7 +118,7 @@ export async function getPublishedMixBySlug(slug: string): Promise<Mix | null> {
     .maybeSingle();
 
   if (error) {
-    console.error(`Failed to fetch mix for slug "${slug}":`, error);
+    console.error(`Failed to fetch mix for slug "${slug}":`, error.message ?? JSON.stringify(error));
     return null;
   }
 
