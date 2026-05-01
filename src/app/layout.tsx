@@ -1,5 +1,5 @@
 import "./globals.css";
-import CircuitCanvas from "@/components/CircuitCanvas";
+import FluidCanvas from "@/components/FluidCanvas";
 import SiteFooter from "@/components/SiteFooter";
 import SiteNav from "@/components/SiteNav";
 
@@ -12,21 +12,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen bg-black text-white">
-        <CircuitCanvas />
+        <FluidCanvas />
 
         {/* subtle ember texture */}
         <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_30%_10%,rgba(255,80,60,0.12),transparent_35%),radial-gradient(circle_at_70%_60%,rgba(255,80,60,0.08),transparent_40%)]" />
 
-        {/* ghost portrait background */}
+        {/* centered portrait watermark */}
         <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
           <div
-            className="absolute inset-y-0 left-0 sm:left-[-19%] w-[80vw] sm:w-[52vw] min-w-70 max-w-190 bg-cover bg-top-left sm:bg-left opacity-[0.30] sm:opacity-[0.20] grayscale"
+            className="absolute top-0 bottom-0 left-[18%] -translate-x-1/2 w-[103vw] max-w-295 bg-center bg-contain bg-no-repeat opacity-[0.17] grayscale"
             style={{
               backgroundImage: "url('/images/rufio-portrait.png')",
               maskImage:
-                "linear-gradient(to right, black 0%, black 50%, rgba(0,0,0,0.70) 68%, rgba(0,0,0,0.25) 84%, transparent 100%)",
+                "radial-gradient(ellipse 75% 80% at 50% 45%, black 15%, rgba(0,0,0,0.55) 50%, transparent 78%)",
               WebkitMaskImage:
-                "linear-gradient(to right, black 0%, black 50%, rgba(0,0,0,0.70) 68%, rgba(0,0,0,0.25) 84%, transparent 100%)",
+                "radial-gradient(ellipse 75% 80% at 50% 45%, black 15%, rgba(0,0,0,0.55) 50%, transparent 78%)",
             }}
           />
         </div>
