@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* centered portrait watermark */}
         <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
           <div
-            className="absolute top-0 bottom-0 left-[18%] -translate-x-1/2 w-[103vw] max-w-295 bg-center bg-contain bg-no-repeat opacity-[0.17] grayscale"
+            className="absolute top-0 bottom-0 left-[18%] -translate-x-1/2 w-[103vw] max-w-295 bg-center bg-contain bg-no-repeat opacity-[0.17] grayscale hidden sm:block"
             style={{
               backgroundImage: "url('/images/rufio-portrait.png')",
               maskImage:
