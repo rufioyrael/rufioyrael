@@ -137,7 +137,7 @@ export default function FluidCanvas() {
 
     let w = 0, h = 0, raf = 0, start = 0;
 
-    function resize() {
+    const resize = () => {
       // Cap DPR at 1.5 — fluid shader is expensive per-pixel
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const nw = Math.round(window.innerWidth  * dpr);
@@ -148,14 +148,14 @@ export default function FluidCanvas() {
       canvas.height = h;
       gl.viewport(0, 0, w, h);
       gl.uniform2f(uRes, w, h);
-    }
+    };
 
-    function draw(ts: number) {
+    const draw = (ts: number) => {
       if (!start) start = ts;
       gl.uniform1f(uT, (ts - start) * 0.001); // seconds
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       raf = requestAnimationFrame(draw);
-    }
+    };
 
     resize();
     raf = requestAnimationFrame(draw);
