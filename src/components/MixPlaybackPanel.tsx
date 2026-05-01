@@ -1,17 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 function formatTime(value: number | null) {
-  if (value == null || Number.isNaN(value)) {
-    return "--:--";
-  }
-
+  if (value == null || Number.isNaN(value)) return "--:--";
   const totalSeconds = Math.max(0, Math.floor(value));
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
@@ -25,34 +20,25 @@ type MixPlaybackPanelProps = {
 export default function MixPlaybackPanel({
   src,
   title,
-  coverImageUrl,
   runtime,
 }: MixPlaybackPanelProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState<number | null>(null);
 
   useEffect(() => {
     const audio = audioRef.current;
-
     if (!audio) return;
 
-    // Mirror native audio state into React so the custom transport stays in
-    // sync without replacing the browser's playback engine.
     const syncTime = () => setCurrentTime(audio.currentTime || 0);
     const syncDuration = () => {
-      const nextDuration = Number.isFinite(audio.duration)
-        ? audio.duration
-        : null;
-      setDuration(nextDuration);
+      setDuration(Number.isFinite(audio.duration) ? audio.duration : null);
     };
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => {
-      setIsPlaying(false);
-      setCurrentTime(0);
-    };
+    const handleEnded = () => { setIsPlaying(false); setCurrentTime(0); };
 
     audio.addEventListener("timeupdate", syncTime);
     audio.addEventListener("loadedmetadata", syncDuration);
@@ -74,49 +60,39 @@ export default function MixPlaybackPanel({
     };
   }, []);
 
-  async function togglePlayback() {
+  const togglePlayback = async () => {
     const audio = audioRef.current;
-
     if (!audio) return;
-
     if (audio.paused) {
-      try {
-        await audio.play();
-      } catch {
-        setIsPlaying(false);
-      }
-
-      return;
+      try { await audio.play(); } catch { setIsPlaying(false); }
+    } else {
+      audio.pause();
     }
+  };
 
-    audio.pause();
-  }
-
-  function seekTo(nextValue: number) {
+  const seekTo = (nextValue: number) => {
     const audio = audioRef.current;
-
     if (!audio) return;
-
     audio.currentTime = nextValue;
     setCurrentTime(nextValue);
-  }
+  };
 
-  function seekBy(delta: number) {
+  const seekBy = (delta: number) => {
     const audio = audioRef.current;
-
     if (!audio) return;
-
     const max = Number.isFinite(audio.duration) ? audio.duration : currentTime;
-    const nextValue = Math.min(Math.max(audio.currentTime + delta, 0), max);
-    seekTo(nextValue);
-  }
+    seekTo(Math.min(Math.max(audio.currentTime + delta, 0), max));
+  };
+
+  const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = trackRef.current?.getBoundingClientRect();
+    if (!rect || !progressMax) return;
+    seekTo(((e.clientX - rect.left) / rect.width) * progressMax);
+  };
 
   const progressMax = duration ?? 0;
   const safeCurrentTime = Math.min(currentTime, progressMax || currentTime);
-  const progressPercent =
-    progressMax > 0 ? (safeCurrentTime / progressMax) * 100 : 0;
-  // Build the small metadata row dynamically so null runtime values do not
-  // leave behind empty separators in the UI.
+  const progressPercent = progressMax > 0 ? (safeCurrentTime / progressMax) * 100 : 0;
   const metaParts = ["Rufio Yrael", runtime].filter(Boolean);
 
   return (
@@ -131,120 +107,84 @@ export default function MixPlaybackPanel({
       </div>
 
       <div className="relative">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="relative shrink-0">
-            <div className="absolute inset-2 rounded-full bg-[var(--accent)]/18 blur-2xl" />
-            <div className="relative overflow-hidden rounded-[1.25rem] border border-white/10 bg-white/[0.03]">
-              {coverImageUrl ? (
-                <Image
-                  src={coverImageUrl}
-                  alt={`${title} cover`}
-                  width={192}
-                  height={192}
-                  unoptimized
-                  className="h-20 w-20 object-cover sm:h-24 sm:w-24"
-                />
-              ) : (
-                <div className="flex h-20 w-20 items-center justify-center bg-black/40 sm:h-24 sm:w-24">
-                  <div className="h-8 w-8 rounded-full border border-white/10 bg-white/[0.04]" />
-                </div>
-              )}
-            </div>
+        {/* Title + metadata */}
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold tracking-tight text-white sm:text-[1.2rem]">
+            {title}
+          </h2>
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/42">
+            {metaParts.map((part, index) => (
+              <div key={`${part}-${index}`} className="flex items-center gap-3">
+                {index > 0 ? <span className="text-white/20">•</span> : null}
+                <span>{part}</span>
+              </div>
+            ))}
           </div>
-
-          <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold tracking-tight text-white sm:text-[1.2rem]">
-              {title}
-            </h2>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/42">
-              {metaParts.map((part, index) => (
-                <div key={`${part}-${index}`} className="flex items-center gap-3">
-                  {index > 0 ? <span className="text-white/20">•</span> : null}
-                  <span>{part}</span>
-                </div>
-              ))}
-            </div>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/58">
-              Direct playback from the archive with a quieter, more deliberate
-              listening surface.
-            </p>
-          </div>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/58">
+            Direct playback from the archive with a quieter, more deliberate
+            listening surface.
+          </p>
         </div>
 
-        <div className="mt-5 grid gap-4 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center">
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={togglePlayback}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.06] text-sm text-white transition hover:border-[var(--accent)]/35 hover:bg-white/[0.10]"
-              aria-label={isPlaying ? "Pause mix" : "Play mix"}
-            >
-              {isPlaying ? "II" : "▶"}
-            </button>
+        {/* Transport controls */}
+        <div className="mt-6 flex items-center gap-6">
+          <button
+            type="button"
+            onClick={() => seekBy(-15)}
+            className="text-[11px] uppercase tracking-[0.18em] text-white/45 transition hover:text-white"
+            aria-label="Skip back 15 seconds"
+          >
+            −15
+          </button>
 
-            <button
-              type="button"
-              onClick={() => seekBy(-15)}
-              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white/62 transition hover:border-white/18 hover:text-white"
-            >
-              -15
-            </button>
+          <button
+            type="button"
+            onClick={togglePlayback}
+            className="text-xl text-white/80 transition hover:text-white"
+            aria-label={isPlaying ? "Pause mix" : "Play mix"}
+          >
+            {isPlaying ? "II" : "▶"}
+          </button>
 
-            <button
-              type="button"
-              onClick={() => seekBy(15)}
-              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white/62 transition hover:border-white/18 hover:text-white"
-            >
-              +15
-            </button>
+          <button
+            type="button"
+            onClick={() => seekBy(15)}
+            className="text-[11px] uppercase tracking-[0.18em] text-white/45 transition hover:text-white"
+            aria-label="Skip forward 15 seconds"
+          >
+            +15
+          </button>
+        </div>
 
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/38">
-              {isPlaying ? "Now playing" : "Ready"}
-            </div>
-          </div>
+        {/* Progress line + dot */}
+        <div
+          ref={trackRef}
+          className="relative mt-8 cursor-pointer py-3"
+          onClick={handleTrackClick}
+          role="slider"
+          aria-label="Playback progress"
+          aria-valuenow={Math.round(safeCurrentTime)}
+          aria-valuemin={0}
+          aria-valuemax={Math.round(progressMax)}
+        >
+          {/* Full track line */}
+          <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-white/15" />
+          {/* Played portion */}
+          <div
+            className="absolute left-0 top-1/2 h-px -translate-y-1/2 bg-white/50 transition-[width] duration-100"
+            style={{ width: `${progressPercent}%` }}
+          />
+          {/* Playhead dot */}
+          <div
+            className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white transition-[left] duration-100"
+            style={{ left: `${progressPercent}%` }}
+          />
+        </div>
 
-          <div>
-            <div className="relative h-12 overflow-hidden rounded-xl border border-white/8 bg-[#131317] px-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-              <div
-                className="absolute inset-y-0 left-0 bg-[linear-gradient(90deg,rgba(123,18,14,0.55),rgba(225,6,0,0.16),transparent)] transition-[width] duration-200"
-                style={{ width: `${progressPercent}%` }}
-              />
-              <div className="relative flex h-full items-center gap-1.5">
-                {Array.from({ length: 36 }).map((_, index) => {
-                  const pattern = [22, 30, 42, 58, 38, 26, 52, 46, 34, 24];
-                  const height = pattern[index % pattern.length];
-                  const isActive = progressPercent > (index / 35) * 100;
-
-                  return (
-                    <span
-                      key={index}
-                      className={[
-                        "block flex-1 rounded-full transition-colors duration-200",
-                        isActive ? "bg-[rgba(164,44,36,0.9)]" : "bg-[#232329]",
-                      ].join(" ")}
-                      style={{ height: `${height}%` }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            <input
-              type="range"
-              min={0}
-              max={progressMax || 0}
-              step={1}
-              value={safeCurrentTime}
-              onChange={(event) => seekTo(Number(event.target.value))}
-              className="mt-2 w-full accent-[rgb(164,44,36)]"
-              aria-label="Playback progress"
-            />
-
-            <div className="mt-1.5 flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-white/42">
-              <span>{formatTime(safeCurrentTime)}</span>
-              <span>{formatTime(duration)}</span>
-            </div>
-          </div>
+        {/* Timestamps */}
+        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-white/38">
+          <span>{formatTime(safeCurrentTime)}</span>
+          <span>{formatTime(duration)}</span>
         </div>
       </div>
     </div>

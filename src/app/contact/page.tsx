@@ -40,10 +40,10 @@ export default function ContactPage() {
             </div>
             <div className="px-6 py-6">
               <a
-                href="mailto:booking@rufioyrael.com"
+                href="mailto:rufioyrael@gmail.com"
                 className="inline-flex items-center gap-2 rounded-2xl border border-(--accent)/35 bg-(--accent)/14 px-6 py-3 text-sm font-semibold text-white transition duration-200 hover:border-(--accent)/55 hover:bg-(--accent)/22 hover:shadow-[0_0_28px_rgba(225,6,0,0.18)]"
               >
-                booking@rufioyrael.com <span aria-hidden>→</span>
+                rufioyrael@gmail.com <span aria-hidden>→</span>
               </a>
             </div>
           </div>
@@ -72,43 +72,18 @@ export default function ContactPage() {
 
         {/* Right — info sidebar */}
         <div className="lg:col-span-5">
-          <div className="panel overflow-hidden">
-
-            <div className="space-y-5 px-6 py-6">
-              <div className="text-[11px] uppercase tracking-[0.22em] text-white/38">
-                Info
-              </div>
-
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.20em] text-white/32">Location</div>
-                <div className="mt-1.5 text-sm text-white/75">Philadelphia, PA</div>
-              </div>
-
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.20em] text-white/32">Availability</div>
-                <div className="mt-1.5 text-sm text-white/75">Select dates — inquire for schedule</div>
-              </div>
-
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.20em] text-white/32">Response time</div>
-                <div className="mt-1.5 text-sm text-white/75">Within a few days</div>
-              </div>
-
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.20em] text-white/32">Travel</div>
-                <div className="mt-1.5 text-sm text-white/75">Available regionally and beyond</div>
-              </div>
-            </div>
-
+          <div className="panel p-6 space-y-4">
+            <p className="text-sm leading-relaxed text-white/65">
+              Philadelphia, PA — available for select dates, open to travel.
+            </p>
+            <p className="text-sm leading-relaxed text-white/65">
+              Responses within a few days.
+            </p>
             <div className="h-px bg-white/8" />
-
-            <div className="px-6 py-5">
-              <p className="text-xs leading-relaxed text-white/35">
-                Please include event date, venue, and a budget range in your
-                initial message. Incomplete inquiries may not receive a response.
-              </p>
-            </div>
-
+            <p className="text-xs leading-relaxed text-white/35">
+              Please include event date, venue, and a budget range in your
+              initial message. Incomplete inquiries may not receive a response.
+            </p>
           </div>
         </div>
 

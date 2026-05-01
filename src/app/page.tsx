@@ -13,26 +13,18 @@ export default function HomePage() {
           </div>
 
           <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.01] tracking-tight sm:text-[4rem]">
-            <span className="block text-white">Process &amp; Steel.</span>
-            <span className="block text-white/60">Underground sound, carefully built.</span>
+            <span className="block text-white">Tension builds.</span>
+            <span className="block text-white/60">Then the drop hits.</span>
           </h1>
 
           <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-white/65 sm:text-base">
-            DJ mixes, tracklists, and live recordings — presented with restraint.
-            Minimal interface. Maximum intention.
+            Built out of Philly&apos;s underground — dark, slow-burning, and deliberately
+            emotional. Sets that hold a room and don&apos;t let it go.
           </p>
 
-          {/* Genre labels — decorative, not interactive */}
-          <div className="mt-7 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em] text-white/45">
-            <span className="rounded-md border border-white/10 bg-black/30 px-3 py-1.5">
-              melodic techno
-            </span>
-            <span className="rounded-md border border-white/10 bg-black/30 px-3 py-1.5">
-              drum &amp; bass
-            </span>
-            <span className="rounded-md border border-white/10 bg-black/30 px-3 py-1.5">
-              dark / minimal
-            </span>
+          {/* Twitch status — update date when confirmed */}
+          <div className="mt-7 text-[11px] uppercase tracking-[0.22em] text-white/38">
+            Next Livestream on Twitch — Date TBA
           </div>
 
           {/* Primary + secondary CTA */}
@@ -97,7 +89,7 @@ export default function HomePage() {
             <div className="h-px bg-white/8" />
 
             <div className="px-6 py-4 text-[11px] uppercase tracking-[0.18em] text-white/28">
-              Philadelphia · Available for select dates
+              Philadelphia · Available for select dates · Open to travel
             </div>
 
           </div>

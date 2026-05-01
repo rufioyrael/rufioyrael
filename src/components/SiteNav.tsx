@@ -92,14 +92,6 @@ export default function SiteNav() {
               })}
             </nav>
 
-            <div className="ml-2 flex items-center gap-2">
-              <Link
-                href="/contact"
-                className="rounded-full border border-[color:var(--accent)]/30 bg-[color:var(--accent)]/[0.14] px-4 py-2 text-sm text-white transition hover:border-[color:var(--accent)]/45 hover:bg-[color:var(--accent)]/[0.18]"
-              >
-                Bookings / Collabs
-              </Link>
-            </div>
           </div>
 
           {/* Mobile toggle */}
@@ -146,17 +138,6 @@ export default function SiteNav() {
                 })}
               </nav>
 
-              <div className="my-3 h-px bg-white/8" />
-
-              <div className="grid grid-cols-1 gap-2">
-                <Link
-                  href="/contact"
-                  onClick={() => setMenuOpen(false)}
-                  className="rounded-2xl border border-[color:var(--accent)]/30 bg-[color:var(--accent)]/[0.14] px-4 py-3 text-center text-sm text-white transition hover:border-[color:var(--accent)]/45 hover:bg-[color:var(--accent)]/[0.18]"
-                >
-                  Bookings / Collabs
-                </Link>
-              </div>
             </div>
           </div>
         </div>
