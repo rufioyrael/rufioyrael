@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "splash_shown";
 const TEXT_DELAY  = 60;   // ms before text starts fading in
-const FADE_OUT_AT = 1500; // ms before overlay starts fading out
-const UNMOUNT_AT  = 2200; // ms before component is removed
+const FADE_OUT_AT = 2200; // ms before overlay starts fading out
+const UNMOUNT_AT  = 2900; // ms before component is removed
 
 export default function SplashScreen() {
   const [visible,     setVisible]     = useState(false);
@@ -31,7 +31,7 @@ export default function SplashScreen() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black"
       style={{
         opacity:    fadingOut ? 0 : 1,
         transition: fadingOut ? "opacity 700ms ease" : "none",
