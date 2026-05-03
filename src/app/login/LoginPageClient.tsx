@@ -12,7 +12,7 @@ export default function LoginPageClient() {
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setStatus(null);
 
@@ -34,7 +34,8 @@ export default function LoginPageClient() {
         return;
       }
 
-      const next = params.get("next") || "/admin/upload";
+      const raw = params.get("next") ?? "";
+      const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/admin/upload";
       router.replace(next);
       router.refresh();
     } catch (err: unknown) {

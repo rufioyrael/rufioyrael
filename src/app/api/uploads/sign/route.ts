@@ -77,14 +77,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing filename." }, { status: 400 });
     }
 
-    if (kind === "audio" && !contentType.startsWith("audio/")) {
+    const ALLOWED_AUDIO_TYPES = ["audio/mpeg", "audio/wav", "audio/flac", "audio/aac", "audio/mp4", "audio/ogg", "audio/x-wav"];
+    const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    const ALLOWED_AUDIO_EXTS  = ["mp3", "wav", "flac", "aac", "m4a", "ogg"];
+    const ALLOWED_IMAGE_EXTS  = ["jpg", "jpeg", "png", "webp", "gif"];
+
+    if (kind === "audio" && !ALLOWED_AUDIO_TYPES.includes(contentType)) {
       return NextResponse.json(
         { error: "Only audio uploads are allowed for audio kind." },
         { status: 400 }
       );
     }
 
-    if (kind === "cover" && !contentType.startsWith("image/")) {
+    if (kind === "cover" && !ALLOWED_IMAGE_TYPES.includes(contentType)) {
       return NextResponse.json(
         { error: "Only image uploads are allowed for cover kind." },
         { status: 400 }
@@ -92,6 +97,11 @@ export async function POST(req: Request) {
     }
 
     const ext = getExtension(filename);
+    const allowedExts = kind === "cover" ? ALLOWED_IMAGE_EXTS : ALLOWED_AUDIO_EXTS;
+    if (ext && !allowedExts.includes(ext)) {
+      return NextResponse.json({ error: "File extension not allowed." }, { status: 400 });
+    }
+
     const safeFilename = sanitizeFilename(filename);
 
     const folder = kind === "cover" ? "covers" : "mixes";
