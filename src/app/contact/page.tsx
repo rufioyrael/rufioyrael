@@ -49,20 +49,14 @@ export default function ContactPage() {
           </div>
 
           <div>
-            <div className="mb-4 text-[11px] uppercase tracking-[0.22em] text-white/38">
+            <div className="mb-1 text-[11px] uppercase tracking-[0.22em] text-white/38">
               Open to
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="divide-y divide-white/8">
               {INQUIRY_TYPES.map(({ label, detail }) => (
-                <div
-                  key={label}
-                  className="flex items-start gap-3 rounded-xl border border-white/8 bg-white/2 px-4 py-4"
-                >
-                  <span className="mt-0.75 h-1.5 w-1.5 shrink-0 rounded-full bg-(--accent)/55" />
-                  <div>
-                    <div className="text-sm text-white/80">{label}</div>
-                    <div className="mt-0.5 text-xs text-white/40">{detail}</div>
-                  </div>
+                <div key={label} className="flex items-baseline justify-between gap-6 py-4">
+                  <span className="text-sm text-white/75">{label}</span>
+                  <span className="text-right text-xs text-white/38">{detail}</span>
                 </div>
               ))}
             </div>
