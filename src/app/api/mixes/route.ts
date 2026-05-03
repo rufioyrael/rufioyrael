@@ -22,6 +22,11 @@ function sanitizeSlug(input: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+function validateMixType(value: unknown): "live-set" | "twitch-stream" | null {
+  if (value === "live-set" || value === "twitch-stream") return value;
+  return null;
+}
+
 type CreateMixBody = {
   id?: string;
   slug?: string;
@@ -35,11 +40,10 @@ type CreateMixBody = {
   published?: boolean;
   audioUrl?: string | null;
   coverImageUrl?: string | null;
+  type?: string;
 };
 
 async function requireAdmin() {
-  // API routes re-check admin access even though /admin UI is guarded in proxy.ts.
-  // This keeps write endpoints protected if they are ever called directly.
   const supabase = await supabaseServer();
 
   const {
@@ -58,6 +62,9 @@ async function requireAdmin() {
   return { user };
 }
 
+const ADMIN_SELECT =
+  "id, slug, title, date_label, runtime, description, tags, tracklist, published, featured, audio_url, cover_image_url, type, created_at";
+
 export async function GET() {
   try {
     const auth = await requireAdmin();
@@ -65,13 +72,9 @@ export async function GET() {
 
     const admin = getSupabaseAdminClient();
 
-    // Return the fuller admin-facing shape so the CMS page can edit records
-    // in place without fetching each mix again individually.
     const { data, error } = await admin
       .from("mixes")
-      .select(
-        "id, slug, title, date_label, runtime, description, tags, tracklist, published, featured, audio_url, cover_image_url, created_at"
-      )
+      .select(ADMIN_SELECT)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -82,7 +85,6 @@ export async function GET() {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to fetch mixes.";
-
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -99,6 +101,7 @@ export async function POST(req: Request) {
     const dateLabel = String(body.dateLabel ?? "").trim();
     const runtime = String(body.runtime ?? "").trim();
     const description = String(body.description ?? "").trim();
+    const mixType = validateMixType(body.type);
 
     const audioUrl =
       body.audioUrl && String(body.audioUrl).trim()
@@ -121,33 +124,15 @@ export async function POST(req: Request) {
     const featured = Boolean(body.featured);
     const published = Boolean(body.published);
 
-    if (!title) {
-      return NextResponse.json({ error: "Missing title." }, { status: 400 });
-    }
-
-    if (!slug) {
-      return NextResponse.json({ error: "Missing slug." }, { status: 400 });
-    }
-
-    if (!dateLabel) {
-      return NextResponse.json({ error: "Missing date." }, { status: 400 });
-    }
-
-    if (!runtime) {
-      return NextResponse.json({ error: "Missing runtime." }, { status: 400 });
-    }
-
-    if (!description) {
-      return NextResponse.json(
-        { error: "Missing description." },
-        { status: 400 }
-      );
-    }
+    if (!title) return NextResponse.json({ error: "Missing title." }, { status: 400 });
+    if (!slug) return NextResponse.json({ error: "Missing slug." }, { status: 400 });
+    if (!dateLabel) return NextResponse.json({ error: "Missing date." }, { status: 400 });
+    if (!runtime) return NextResponse.json({ error: "Missing runtime." }, { status: 400 });
+    if (!description) return NextResponse.json({ error: "Missing description." }, { status: 400 });
+    if (!mixType) return NextResponse.json({ error: "Missing type — select Live Set or Twitch Stream." }, { status: 400 });
 
     const admin = getSupabaseAdminClient();
 
-    // Admin writes use the service-role client here so UI-level admin auth
-    // stays separate from public read RLS policies.
     const { data, error } = await admin
       .from("mixes")
       .insert({
@@ -162,8 +147,9 @@ export async function POST(req: Request) {
         published,
         audio_url: audioUrl,
         cover_image_url: coverImageUrl,
+        type: mixType,
       })
-      .select("id, slug, title, published, featured, audio_url, cover_image_url")
+      .select("id, slug, title, published, featured, audio_url, cover_image_url, type")
       .single();
 
     if (error) {
@@ -171,7 +157,6 @@ export async function POST(req: Request) {
         error.code === "23505"
           ? "A mix with that slug already exists."
           : error.message;
-
       return NextResponse.json({ error: message }, { status: 400 });
     }
 
@@ -179,7 +164,6 @@ export async function POST(req: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to create mix.";
-
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -192,9 +176,7 @@ export async function DELETE(req: Request) {
     const body = (await req.json()) as { id?: string };
     const id = String(body.id ?? "").trim();
 
-    if (!id) {
-      return NextResponse.json({ error: "Missing mix id." }, { status: 400 });
-    }
+    if (!id) return NextResponse.json({ error: "Missing mix id." }, { status: 400 });
 
     const admin = getSupabaseAdminClient();
 
@@ -208,7 +190,6 @@ export async function DELETE(req: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to delete mix.";
-
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -225,6 +206,7 @@ export async function PATCH(req: Request) {
     const dateLabel = String(body.dateLabel ?? "").trim();
     const runtime = String(body.runtime ?? "").trim();
     const description = String(body.description ?? "").trim();
+    const mixType = validateMixType(body.type);
 
     const audioUrl =
       body.audioUrl && String(body.audioUrl).trim()
@@ -247,37 +229,16 @@ export async function PATCH(req: Request) {
     const featured = Boolean(body.featured);
     const published = Boolean(body.published);
 
-    if (!id) {
-      return NextResponse.json({ error: "Missing mix id." }, { status: 400 });
-    }
-
-    if (!title) {
-      return NextResponse.json({ error: "Missing title." }, { status: 400 });
-    }
-
-    if (!slug) {
-      return NextResponse.json({ error: "Missing slug." }, { status: 400 });
-    }
-
-    if (!dateLabel) {
-      return NextResponse.json({ error: "Missing date." }, { status: 400 });
-    }
-
-    if (!runtime) {
-      return NextResponse.json({ error: "Missing runtime." }, { status: 400 });
-    }
-
-    if (!description) {
-      return NextResponse.json(
-        { error: "Missing description." },
-        { status: 400 }
-      );
-    }
+    if (!id) return NextResponse.json({ error: "Missing mix id." }, { status: 400 });
+    if (!title) return NextResponse.json({ error: "Missing title." }, { status: 400 });
+    if (!slug) return NextResponse.json({ error: "Missing slug." }, { status: 400 });
+    if (!dateLabel) return NextResponse.json({ error: "Missing date." }, { status: 400 });
+    if (!runtime) return NextResponse.json({ error: "Missing runtime." }, { status: 400 });
+    if (!description) return NextResponse.json({ error: "Missing description." }, { status: 400 });
+    if (!mixType) return NextResponse.json({ error: "Missing type — select Live Set or Twitch Stream." }, { status: 400 });
 
     const admin = getSupabaseAdminClient();
 
-    // PATCH mirrors POST validation so quick actions and full-form edits save
-    // the same normalized shape back into the table.
     const { data, error } = await admin
       .from("mixes")
       .update({
@@ -292,9 +253,10 @@ export async function PATCH(req: Request) {
         published,
         audio_url: audioUrl,
         cover_image_url: coverImageUrl,
+        type: mixType,
       })
       .eq("id", id)
-      .select("id, slug, title, published, featured, audio_url, cover_image_url")
+      .select("id, slug, title, published, featured, audio_url, cover_image_url, type")
       .single();
 
     if (error) {
@@ -302,7 +264,6 @@ export async function PATCH(req: Request) {
         error.code === "23505"
           ? "A mix with that slug already exists."
           : error.message;
-
       return NextResponse.json({ error: message }, { status: 400 });
     }
 
@@ -310,7 +271,6 @@ export async function PATCH(req: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to update mix.";
-
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

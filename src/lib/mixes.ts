@@ -12,6 +12,7 @@ export type Mix = {
   published: boolean;
   audioUrl: string | null;
   coverImageUrl: string | null;
+  type: "live-set" | "twitch-stream";
 };
 
 type MixRow = {
@@ -26,6 +27,7 @@ type MixRow = {
   published: boolean | null;
   audio_url: string | null;
   cover_image_url: string | null;
+  type: string | null;
 };
 
 function getPublicSupabaseClient() {
@@ -60,7 +62,6 @@ function normalizeText(value: string | null): string | null {
 
 function normalizeTags(value: string[] | null): string[] {
   if (!Array.isArray(value)) return [];
-
   return value.map((tag) => tag.trim()).filter(Boolean);
 }
 
@@ -69,8 +70,11 @@ function normalizeUrl(value: string | null): string | null {
   return normalized ? normalized : null;
 }
 
+function normalizeType(value: string | null): "live-set" | "twitch-stream" {
+  return value === "twitch-stream" ? "twitch-stream" : "live-set";
+}
+
 function mapRowToMix(row: MixRow): Mix {
-  // Normalize DB rows once here so rendering code can work with a consistent shape.
   return {
     slug: row.slug.trim(),
     title: row.title.trim(),
@@ -83,17 +87,19 @@ function mapRowToMix(row: MixRow): Mix {
     published: row.published ?? false,
     audioUrl: normalizeUrl(row.audio_url),
     coverImageUrl: normalizeUrl(row.cover_image_url),
+    type: normalizeType(row.type),
   };
 }
+
+const SELECT_FIELDS =
+  "slug, title, date_label, runtime, tags, description, tracklist, featured, published, audio_url, cover_image_url, type, created_at";
 
 export async function getPublishedMixes(): Promise<Mix[]> {
   const supabase = getPublicSupabaseClient();
 
   const { data, error } = await supabase
     .from("mixes")
-    .select(
-      "slug, title, date_label, runtime, tags, description, tracklist, featured, published, audio_url, cover_image_url, created_at"
-    )
+    .select(SELECT_FIELDS)
     .eq("published", true)
     .order("created_at", { ascending: false });
 
@@ -110,9 +116,7 @@ export async function getPublishedMixBySlug(slug: string): Promise<Mix | null> {
 
   const { data, error } = await supabase
     .from("mixes")
-    .select(
-      "slug, title, date_label, runtime, tags, description, tracklist, featured, published, audio_url, cover_image_url"
-    )
+    .select(SELECT_FIELDS)
     .eq("slug", slug)
     .eq("published", true)
     .maybeSingle();

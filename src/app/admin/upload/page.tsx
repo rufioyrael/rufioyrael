@@ -17,6 +17,7 @@ type AdminMixRow = {
   audio_url: string | null;
   cover_image_url: string | null;
   created_at: string;
+  type: "live-set" | "twitch-stream";
 };
 
 type StatusState = {
@@ -48,6 +49,7 @@ export default function AdminUploadPage() {
   const [tracklistInput, setTracklistInput] = useState("");
   const [featured, setFeatured] = useState(false);
   const [published, setPublished] = useState(false);
+  const [mixType, setMixType] = useState<"live-set" | "twitch-stream">("live-set");
 
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioFileName, setAudioFileName] = useState<string | null>(null);
@@ -148,6 +150,7 @@ export default function AdminUploadPage() {
     setTracklistInput("");
     setFeatured(false);
     setPublished(false);
+    setMixType("live-set");
 
     setAudioFile(null);
     setAudioFileName(null);
@@ -171,6 +174,7 @@ export default function AdminUploadPage() {
     setTracklistInput((mix.tracklist ?? []).join("\n"));
     setFeatured(mix.featured);
     setPublished(mix.published);
+    setMixType(mix.type ?? "live-set");
     setAudioFile(null);
     setAudioFileName(null);
     setCoverFile(null);
@@ -236,6 +240,7 @@ export default function AdminUploadPage() {
 
     if (!title.trim()) return setStatus({ tone: "error", message: "Missing title." });
     if (!resolvedSlug.trim()) return setStatus({ tone: "error", message: "Missing slug." });
+    if (!mixType) return setStatus({ tone: "error", message: "Missing type — select Live Set or Twitch Stream." });
     if (!date.trim()) return setStatus({ tone: "error", message: "Missing date." });
     if (!runtime.trim()) return setStatus({ tone: "error", message: "Missing runtime." });
     if (!description.trim()) {
@@ -270,6 +275,7 @@ export default function AdminUploadPage() {
           tracklist: parsedTracklist,
           featured,
           published,
+          type: mixType,
           audioUrl,
           coverImageUrl,
         }),
@@ -376,6 +382,7 @@ export default function AdminUploadPage() {
           tracklist: mix.tracklist ?? [],
           published: nextPublished,
           featured: nextFeatured,
+          type: mix.type,
           audioUrl: mix.audio_url,
           coverImageUrl: mix.cover_image_url,
         }),
@@ -517,6 +524,29 @@ export default function AdminUploadPage() {
                   <div className="mt-2 text-xs text-white/40">
                     Effective slug:{" "}
                     <span className="text-white/65">{resolvedSlug || "—"}</span>
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="mb-2 block text-[11px] uppercase tracking-[0.18em] text-white/45">
+                    Type <span className="text-[var(--accent)]">*</span>
+                  </label>
+                  <div className="flex gap-2">
+                    {(["live-set", "twitch-stream"] as const).map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setMixType(t)}
+                        className={[
+                          "flex-1 rounded-xl border px-4 py-3 text-sm transition",
+                          mixType === t
+                            ? "border-[var(--accent)]/40 bg-[var(--accent)]/12 text-white"
+                            : "border-white/10 bg-black/20 text-white/55 hover:border-white/20 hover:text-white/80",
+                        ].join(" ")}
+                      >
+                        {t === "live-set" ? "Live Set" : "Twitch Stream"}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
@@ -762,6 +792,9 @@ Artist Name — Second Track`}
 
               <div className="mt-6 grid gap-2 text-[11px] uppercase tracking-[0.18em] text-white/40">
                 <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  Type: {mixType === "live-set" ? "Live Set" : "Twitch Stream"}
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
                   Mode: {editingId ? "Editing existing" : "Creating new"}
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
@@ -965,6 +998,9 @@ Artist Name — Second Track`}
                     </div>
 
                       <div className="mt-4 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em]">
+                        <span className="rounded-md border border-white/10 bg-white/[0.03] px-3 py-[6px] text-white/50">
+                          {mix.type === "twitch-stream" ? "Twitch Stream" : "Live Set"}
+                        </span>
                         <span className="rounded-md border border-white/10 bg-white/[0.03] px-3 py-[6px] text-white/50">
                           {mix.published ? "Published" : "Draft"}
                         </span>
