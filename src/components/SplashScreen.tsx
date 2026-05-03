@@ -39,7 +39,7 @@ export default function SplashScreen() {
       aria-hidden="true"
     >
       <span
-        className="select-none text-[1.9rem] font-semibold uppercase tracking-[0.45em] text-white sm:text-[3rem]"
+        className="select-none text-center text-[1.6rem] font-semibold uppercase tracking-[0.28em] text-white sm:text-[3rem] sm:tracking-[0.45em]"
         style={{
           opacity:    textReady ? 1 : 0,
           transition: "opacity 450ms ease",
