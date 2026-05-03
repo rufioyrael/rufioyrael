@@ -26,8 +26,7 @@ export default function ContactPage() {
       <section className="mt-14 grid gap-10 sm:mt-16 lg:grid-cols-12 lg:items-start">
 
         {/* Left — primary contact */}
-        <div className="space-y-8 lg:col-span-7">
-
+        <div className="lg:col-span-7">
           <div className="panel overflow-hidden">
             <div className="space-y-1 px-6 pt-6 pb-2">
               <div className="text-[10px] uppercase tracking-[0.20em] text-white/32">
@@ -47,21 +46,6 @@ export default function ContactPage() {
               </a>
             </div>
           </div>
-
-          <div>
-            <div className="mb-1 text-[11px] uppercase tracking-[0.22em] text-white/38">
-              Open to
-            </div>
-            <div className="divide-y divide-white/8">
-              {INQUIRY_TYPES.map(({ label, detail }) => (
-                <div key={label} className="flex items-baseline justify-between gap-6 py-4">
-                  <span className="text-sm text-white/75">{label}</span>
-                  <span className="text-right text-xs text-white/38">{detail}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
         </div>
 
         {/* Right — info sidebar */}
@@ -81,6 +65,20 @@ export default function ContactPage() {
           </div>
         </div>
 
+      </section>
+
+      <section className="mt-10">
+        <div className="mb-1 text-[11px] uppercase tracking-[0.22em] text-white/38">
+          Open to
+        </div>
+        <div className="divide-y divide-white/8">
+          {INQUIRY_TYPES.map(({ label, detail }) => (
+            <div key={label} className="flex items-baseline justify-between gap-6 py-4">
+              <span className="text-sm text-white/75">{label}</span>
+              <span className="text-right text-xs text-white/38">{detail}</span>
+            </div>
+          ))}
+        </div>
       </section>
 
     </main>
