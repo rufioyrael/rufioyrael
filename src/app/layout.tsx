@@ -1,5 +1,6 @@
 import "./globals.css";
 import FluidCanvas from "@/components/FluidCanvas";
+import SplashScreen from "@/components/SplashScreen";
 import SiteFooter from "@/components/SiteFooter";
 import SiteNav from "@/components/SiteNav";
 
@@ -12,6 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen bg-black text-white">
+        <SplashScreen />
         <FluidCanvas />
 
         {/* subtle ember texture */}
