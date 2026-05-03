@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 type AdminMixRow = {
@@ -35,6 +36,13 @@ function slugify(input: string) {
 }
 
 export default function AdminUploadPage() {
+  const router = useRouter();
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+  }
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">(
@@ -445,8 +453,16 @@ export default function AdminUploadPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
       <section className="max-w-3xl">
-        <div className="text-[11px] uppercase tracking-[0.22em] text-white/45">
-          Admin
+        <div className="flex items-center justify-between">
+          <div className="text-[11px] uppercase tracking-[0.22em] text-white/45">
+            Admin
+          </div>
+          <button
+            onClick={handleLogout}
+            className="text-[11px] uppercase tracking-[0.18em] text-white/35 transition hover:text-white/70"
+          >
+            Sign out
+          </button>
         </div>
 
         <h1 className="mt-4 text-[2.4rem] font-semibold leading-[1.01] tracking-tight sm:text-[3.5rem]">
