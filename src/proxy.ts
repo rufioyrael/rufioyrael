@@ -8,7 +8,7 @@ function getAllowedAdmins() {
     .filter(Boolean);
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const res = NextResponse.next();
 
   // Keep the guard scoped to /admin so public routes stay cache-friendly.

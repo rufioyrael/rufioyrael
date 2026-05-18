@@ -106,6 +106,7 @@ export default async function MixDetailPage({ params }: PageProps) {
               title={mix.title}
               coverImageUrl={mix.coverImageUrl}
               runtime={mix.runtime ?? undefined}
+              downloadHref={`/api/download/${slug}`}
             />
           ) : (
             <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-5 py-4 shadow-[0_24px_80px_rgba(0,0,0,0.30)] sm:px-6 sm:py-5">

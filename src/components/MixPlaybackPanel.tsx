@@ -15,12 +15,14 @@ type MixPlaybackPanelProps = {
   title: string;
   coverImageUrl?: string | null;
   runtime?: string;
+  downloadHref?: string;
 };
 
 export default function MixPlaybackPanel({
   src,
   title,
   runtime,
+  downloadHref,
 }: MixPlaybackPanelProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -108,7 +110,8 @@ export default function MixPlaybackPanel({
 
       <div className="relative">
         {/* Title + metadata */}
-        <div className="min-w-0">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
           <h2 className="text-base font-semibold tracking-tight text-white sm:text-[1.2rem]">
             {title}
           </h2>
@@ -124,6 +127,17 @@ export default function MixPlaybackPanel({
             Direct playback from the archive with a quieter, more deliberate
             listening surface.
           </p>
+          </div>
+
+          {downloadHref ? (
+            <a
+              href={downloadHref}
+              download
+              className="shrink-0 rounded-lg border border-white/20 px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-white/60 transition hover:border-white/40 hover:text-white"
+            >
+              ↓ Download
+            </a>
+          ) : null}
         </div>
 
         {/* Transport controls */}
@@ -186,6 +200,7 @@ export default function MixPlaybackPanel({
           <span>{formatTime(safeCurrentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
+
       </div>
     </div>
   );
